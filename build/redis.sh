@@ -1,11 +1,9 @@
-# check if the git_root is set
-if [ ! -n $git_root ]; then
-	echo "run 'source init.bash' first"
-	exit 1
-fi
+bash ./init.sh
+
+export git_root=$(git rev-parse --show-toplevel)
 
 # download redis if not exist
-if [ ! -n `which redis`]; then
+if [ ! -n "$(redis-cli -v)" ]; then
 	curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
 	echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
 	sudo apt-get update
@@ -17,22 +15,19 @@ if [ ! -n `redis-cli ping | grep 'PONG'` ]; then
 	cd $git_root/lib/redis && redis-server &
 fi
 
-# compile YCSB
-if [ ! -d $git_root/lib/YCSB ]; then
-	cd $git_root/lib
-	git clone http://github.com/brianfrankcooper/YCSB.git
-fi
 cd $git_root/lib/YCSB
-mvn -pl site.ycsb:redis-binding -am clean package
+bash $git_root/build/maven.sh
+sudo mvn -e -pl site.ycsb:redis-binding -am clean package
 
 # setup output path
-out_path=$git_root/lib/redis/out
-mkdir -p $out_path 
+out_path=$git_root/out/redis
+sudo mkdir -p $out_path
+
+bash $git_root/build/python.sh
 
 # set config
-# 	*set the cluster parameter to true if redis cluster mode is enabled. Default is false.
-./bin/ycsb load redis -s -P workloads/workloada -p "redis.host=127.0.0.1" -p "redis.port=6379" > $out_path/outputLoad.txt
+#       *set the cluster parameter to true if redis cluster mode is enabled. Default is false.
+sudo ./bin/ycsb load redis -s -P workloads/workloada -p redis.host=127.0.0.1 -p redis.port=6379 | sudo tee $out_path/outputLoad.txt
 
-# load the data and run tests
-./bin/ycsb load redis -s -P workloads/workloada > $out_path/outputLoad.txt
-./bin/ycsb run redis -s -P workloads/workloada > $out_path/outputRun.txt
+# run tests
+sudo ./bin/ycsb run redis -s -P workloads/workloada -p redis.host=127.0.0.1 -p redis.port=6379 | sudo tee $out_path/outputRun.txt

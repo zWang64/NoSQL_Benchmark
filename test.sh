@@ -1,6 +1,3 @@
-echo $1
-if [ -n "$1" ]; then
-    echo "not null"
-else
-    echo "null"
-fi
+# Use for CI test 
+bash ./build/redis_setup.sh
+bash ./build/redis_run.sh LOAD COUNT

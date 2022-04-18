@@ -9,5 +9,5 @@
 ## How to run the program
 Run default Redis benchmark
 ```shell
-build/redis.sh
+bash ./run.sh
 ```

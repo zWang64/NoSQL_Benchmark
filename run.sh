@@ -1,0 +1,1 @@
+bash build/redis.sh

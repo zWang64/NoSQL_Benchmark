@@ -1,6 +1,6 @@
-bash ./init.sh
-
 export git_root=$(git rev-parse --show-toplevel)
+
+bash $git_root/build/init.sh
 
 # download redis if not exist
 if [ ! -n "$(redis-cli -v)" ]; then
@@ -27,7 +27,7 @@ bash $git_root/build/python.sh
 
 # set config
 #       *set the cluster parameter to true if redis cluster mode is enabled. Default is false.
-sudo ./bin/ycsb load redis -s -P workloads/workloada -p redis.host=127.0.0.1 -p redis.port=6379 | sudo tee $out_path/outputLoad.txt
+sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P workloads/workloada -p redis.host=127.0.0.1 -p redis.port=6379 | sudo tee $out_path/outputLoad.txt
 
 # run tests
-sudo ./bin/ycsb run redis -s -P workloads/workloada -p redis.host=127.0.0.1 -p redis.port=6379 | sudo tee $out_path/outputRun.txt
+sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P workloads/workloada -p redis.host=127.0.0.1 -p redis.port=6379 | sudo tee $out_path/outputRun.txt

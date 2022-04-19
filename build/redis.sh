@@ -1,4 +1,5 @@
 export git_root=$(git rev-parse --show-toplevel)
+export test_name=$1
 
 bash $git_root/build/init.sh
 
@@ -20,7 +21,7 @@ bash $git_root/build/maven.sh
 sudo mvn -e -pl site.ycsb:redis-binding -am clean package
 
 # setup output path
-out_path=$git_root/out/redis
+out_path=$git_root/out/$test_name/redis
 sudo mkdir -p $out_path
 
 bash $git_root/build/python.sh

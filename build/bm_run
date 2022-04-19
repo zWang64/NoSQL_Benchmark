@@ -1,0 +1,60 @@
+#!/bin/sh
+set -e
+
+export git_root=$(git rev-parse --show-toplevel)
+
+# parse commandline input
+echo "testing: $1"
+
+if [ -n "$2" ]; then
+    export workload_clz="workloads/workload$1"
+else
+    export workload_clz="workloads/workloada"
+fi
+echo "using workload: $workload_clz"
+
+if [ -n "$3" ]; then
+    export count=$2
+else
+    export count=1000
+fi
+echo "using record count: $count"
+
+export out_path="$git_root/out/$1-$2-$3"
+sudo mkdir -p $out_path
+echo "output to: $outpath"
+
+echo "--------------------------"
+
+# install dependencies
+bash $git_root/build/YCSB_init.sh >/dev/null 
+
+# build maven
+function build_maven {
+	echo "building maven..."
+	sudo mvn -e -pl site.ycsb:$1-binding -am clean package >/dev/null 
+  	echo "done"
+}
+
+# run database benchmarks
+cd $git_root/lib/YCSB
+echo "running tests..."
+case $1 in
+
+	redis)
+		build_maven $1
+        bash $git_root/redis_init.sh 
+        bash $git_root/redis_run.sh
+        ;;
+
+	memcached)
+		build_maven $1
+		bash $git_root/memcached_init.sh
+		bash $git_root/memcached_run.sh
+		;;
+	
+	*)
+		echo "Usage: bm_run {redis|memcached} {a|b|c|d|e|f} {COUNT}"
+		exit 1
+		;;
+esac

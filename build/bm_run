@@ -1,0 +1,68 @@
+#!/bin/sh
+set -e
+
+init() {
+    export git_root=$(git rev-parse --show-toplevel)
+
+    # parse commandline input
+    export db=$1
+    echo "testing db: $db"
+    
+    if [ -n "$2" ]; then
+        workload_clz=$2
+    else
+        workload_clz="a"
+    fi
+    export workload="workloads/workload$workload_clz"
+    echo "using workload: $workload"
+
+    if [ -n "$3" ]; then
+        export count=$3
+    else
+        export count=1000
+    fi
+    echo "using record count: $count"
+
+    export out_path="$git_root/out/$db-$workload_clz-$count"
+    sudo mkdir -p $out_path
+    echo "output to: $out_path"
+
+    echo "-----------------------------------------------------------------"
+
+    # install dependencies
+    echo "installing dependencies"
+    bash $git_root/build/YCSB_init.sh >/dev/null 
+    echo "done."
+
+    echo "-----------------------------------------------------------------"
+    # init db
+    bash $git_root/build/"$db"_init.sh
+
+    # build maven
+    cd $git_root/lib/YCSB
+    echo "building maven..."
+    sudo mvn -e -pl site.ycsb:$db-binding -am clean package >/dev/null 
+    echo "done."
+
+    echo "-----------------------------------------------------------------"
+    # run bench mark
+    echo "running benchmark..."
+    bash $git_root/build/"$db"_run.sh
+}
+
+# run database benchmarks
+case $1 in
+
+    redis)
+        init $1 $2 $3
+        ;;
+
+    memcached)
+        init $1 $2 $3
+        ;;
+    
+    *)
+        echo "Usage: bm_run {redis|memcached} {a|b|c|d|e|f} {COUNT}"
+        exit 1
+        ;;
+esac

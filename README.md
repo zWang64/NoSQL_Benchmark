@@ -7,13 +7,9 @@
 | Weihao Ye | weihaoy@andrew.cmu.edu |
 
 ## How to run the program
-Run default Redis benchmark
+Run benchmark
 ```shell
-# This will set up the redis environment
-bash ./build/redis_setup.sh
-
-# This will run the redis benchmark
-bash ./build/redis_run.sh LOAD COUNT
+./build/bm_run {redis|memcached} {LOAD:a|b|c|d|e|f} {COUNT}
 ```
 The parameter `LOAD` denotes which workload will be loaded, and ranges from 'a' to 'f'. 
 YCSB offers us 6 pre-configured workload types:
@@ -43,4 +39,13 @@ YCSB offers us 6 pre-configured workload types:
   - Example: user database, where user records are read and modified by the user or to record user activity
 
 The parameter `COUNT` denotes how many records will be inserted into the database and will be tested. Generally speaking, the unit is *byte*, which means *COUNT=30,000,000* will take up approximately 30GB of memory.
-``` 
+
+## How to add a new database
+1. Write `./build/{NEW_DB}_init.sh` to download `NEW_DB` and start it.
+2. Write `./build/{NEW_DB}_init.sh` to start benchmark.
+3. Update `./build/bm_run`
+
+Note that the name `NEW_DB` will be used in YCSB binding and finding scripts, so make sure the name is valid.
+
+## How to set up CI
+After making a change and before pushing to Github, update `./test.sh` and `.github/workflows/makefile.yml`. The script will run automatically after pushing, and you should check the output in the `Actions` tab in Github.

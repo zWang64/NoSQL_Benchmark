@@ -13,7 +13,7 @@ if [ -n "$1" ]; then
 
     # create redis cluster
     #redis-cli --cluster create $node1_ip:6379 $node2_ip:6379 $node3_ip:6379 $node4_ip:6379 $node5_ip:6379 $node6_ip:6379 --cluster-replicas 1
-    redis-cli --cluster create $node1_ip:6379 $node2_ip:6379 $node3_ip:6379 --cluster-replicas 0 
+    redis-cli --cluster create $node1_ip:$redis_cluster_port $node2_ip:$redis_cluster_port $node3_ip:$redis_cluster_port --cluster-replicas 0 
 else
     master_ip="127.0.0.1"
     

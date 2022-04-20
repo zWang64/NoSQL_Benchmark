@@ -9,7 +9,7 @@
 ## How to run the program
 Run benchmark
 ```shell
-./build/bm_run {redis|memcached} {LOAD:a|b|c|d|e|f} {COUNT}
+./build/bm_run {redis|memcached} {LOAD:a|b|c|d|e|f} {COUNT=number} {cluster_mode=*}
 ```
 The parameter `LOAD` denotes which workload will be loaded, and ranges from 'a' to 'f'. 
 YCSB offers us 6 pre-configured workload types:
@@ -39,6 +39,8 @@ YCSB offers us 6 pre-configured workload types:
   - Example: user database, where user records are read and modified by the user or to record user activity
 
 The parameter `COUNT` denotes how many records will be inserted into the database and will be tested. Generally speaking, the unit is *byte*, which means *COUNT=30,000,000* will take up approximately 30GB of memory.
+
+If the fourth parameter exists, the benchmark will run in cluster mode. There should be 6 nodes in the cluster, and their IPs should be configured in `./cluster/cluster.conf`
 
 ## How to add a new database
 1. Write `./build/{NEW_DB}_init.sh` to download `NEW_DB` and start it.

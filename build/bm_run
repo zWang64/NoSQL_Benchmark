@@ -23,7 +23,14 @@ init() {
     fi
     echo "using record count: $count"
 
-    export out_path="$git_root/out/$db-$workload_clz-$count"
+    if [ -n "$4" ]; then
+        export cluster="cluster"
+    else
+        export cluster="single"
+    fi
+    echo "using record count: $count"
+
+    export out_path="$git_root/out/$db-$workload_clz-$count-$cluster"
     sudo mkdir -p $out_path
     echo "output to: $out_path"
 
@@ -36,7 +43,7 @@ init() {
 
     echo "-----------------------------------------------------------------"
     # init db
-    bash $git_root/build/"$db"_init.sh
+    #bash $git_root/build/"$db"_init.sh
 
     # build maven
     cd $git_root/lib/YCSB
@@ -47,6 +54,7 @@ init() {
     echo "-----------------------------------------------------------------"
     # run bench mark
     echo "running benchmark..."
+    echo "git_root=$git_root"
     bash $git_root/build/"$db"_run.sh $4
 }
 

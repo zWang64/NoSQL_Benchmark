@@ -42,6 +42,13 @@ The parameter `COUNT` denotes how many records will be inserted into the databas
 
 If the fourth parameter exists, the benchmark will run in cluster mode. There should be 6 nodes in the cluster, and their IPs should be configured in `./cluster/cluster.conf`
 
+## How to set up Redis cluster
+1. Provision 3 cloud VM.
+2. Add their IPs to `./cluster/cluster.conf`.
+3. Open VMs' ports `6379` and `16379` for Redis cluster communication.
+3. ssh to each VM and run `bash ./build/redis_init.sh c`. This will run Redis server in cluster mode.
+4. Run `bm_run...` in your workspace machine, remember adding the `cluster` parameter. The script will automatically create and set up Redis cluster, run the benchmark, delete the workload, and reset the cluster.
+
 ## How to add a new database
 1. Write `./build/{NEW_DB}_init.sh` to download `NEW_DB` and start it.
 2. Write `./build/{NEW_DB}_run.sh` to start benchmark.

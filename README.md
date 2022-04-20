@@ -38,7 +38,7 @@ YCSB offers us 6 pre-configured workload types:
   - Read/read-modify-write ratio: 50/50
   - Example: user database, where user records are read and modified by the user or to record user activity
 
-The parameter `COUNT` denotes how many records will be inserted into the database and will be tested. Generally speaking, the unit is *byte*, which means *COUNT=30,000,000* will take up approximately 30GB of memory.
+The parameter `COUNT` denotes how many records will be inserted into the database and will be tested. Generally speaking, **one record takes 100 bytes**, which means **COUNT=300,000** will take up approximately 30GB of memory.
 
 If the fourth parameter exists, the benchmark will run in cluster mode. There should be 6 nodes in the cluster, and their IPs should be configured in `./cluster/cluster.conf`
 

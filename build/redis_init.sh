@@ -1,3 +1,5 @@
+export git_root=$(git rev-parse --show-toplevel)
+
 # download redis if not exist
 if [ ! -n "$(redis-cli -v)" ]; then
 	echo "Download redis..."

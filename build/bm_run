@@ -47,22 +47,22 @@ init() {
     echo "-----------------------------------------------------------------"
     # run bench mark
     echo "running benchmark..."
-    bash $git_root/build/"$db"_run.sh
+    bash $git_root/build/"$db"_run.sh $4
 }
 
 # run database benchmarks
 case $1 in
 
     redis)
-        init $1 $2 $3
+        init $1 $2 $3 $4
         ;;
 
     memcached)
-        init $1 $2 $3
+        init $1 $2 $3 $4
         ;;
     
     *)
-        echo "Usage: bm_run {redis|memcached} {a|b|c|d|e|f} {COUNT}"
+        echo "Usage: bm_run {redis|memcached} {a|b|c|d|e|f} {COUNT=number} {cluster_mode=*}"
         exit 1
         ;;
 esac

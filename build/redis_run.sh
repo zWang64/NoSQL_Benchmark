@@ -25,10 +25,10 @@ fi
 
 # set config
 #       *set the cluster parameter to true if redis cluster mode is enabled. Default is false.
-sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 | sudo tee $out_path/outputLoad.txt
+sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=true | sudo tee $out_path/outputLoad.txt
 
 # run tests
-sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 | sudo tee $out_path/outputRun.txt
+sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=true | sudo tee $out_path/outputRun.txt
 
 # clean up
 # note in cluster mode, you need to manually clean up all records in all nodes.

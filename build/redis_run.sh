@@ -4,7 +4,7 @@ echo "git_root=$git_root"
 # clean up redis content if this script fails
 cleanup() {
     echo "Cleaning up redis..."
-    if [ -n "$cluster_mode" ]; then
+    if [ "$cluster_mode" == "true" ]; then
         echo "send FLUSHALL to cluster..."
         redis-cli -h $node1_ip -p 6379 flushall
 	redis-cli -h $node2_ip -p 6379 flushall
@@ -20,6 +20,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
+export cluster_mode="false"
 if [ -n "$1" ]; then
     export cluster_mode="true"
     
@@ -37,7 +38,7 @@ fi
 
 # set config
 #       *set the cluster parameter to true if redis cluster mode is enabled. Default is false.
-sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=true | sudo tee $out_path/outputLoad.txt
+sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=$cluster_mode | sudo tee $out_path/outputLoad.txt
 
 # run tests
-sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=true | sudo tee $out_path/outputRun.txt
+sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=$cluster_mode | sudo tee $out_path/outputRun.txt

@@ -1,16 +1,24 @@
 #export git_root=$(git rev-parse --show-toplevel)
 
 echo "git_root=$git_root"
-
 # clean up redis content if this script fails
 cleanup() {
     echo "Cleaning up redis..."
-    redis-cli flushall
+    if [ -n "$cluster_mode" ]; then
+        echo "send clean to cluster..."
+        redis-cli -h $node1_ip -p 6379 flushall
+	redis-cli -h $node2_ip -p 6379 flushall
+	redis-cli -h $node3_ip -p 6379 flushall
+    else
+    	redis-cli flushall
+    fi
     echo "done"
 }
 trap cleanup EXIT
 
 if [ -n "$1" ]; then
+    export cluster_mode="true"
+    
     source $git_root/cluster/cluster.conf
 
     # create redis cluster
@@ -29,7 +37,3 @@ sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P $workload -p recordcount=$coun
 
 # run tests
 sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=true | sudo tee $out_path/outputRun.txt
-
-# clean up
-# note in cluster mode, you need to manually clean up all records in all nodes.
-redis-cli flushall

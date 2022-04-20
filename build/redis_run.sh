@@ -1,29 +1,39 @@
-export git_root=$(git rev-parse --show-toplevel)
+#export git_root=$(git rev-parse --show-toplevel)
 
+echo "git_root=$git_root"
 # clean up redis content if this script fails
 cleanup() {
     echo "Cleaning up redis..."
-    redis-cli flushall
+    if [ -n "$cluster_mode" ]; then
+        echo "send clean to cluster..."
+        redis-cli -h $node1_ip -p 6379 flushall
+	redis-cli -h $node2_ip -p 6379 flushall
+	redis-cli -h $node3_ip -p 6379 flushall
+    else
+    	redis-cli flushall
+    fi
     echo "done"
 }
 trap cleanup EXIT
 
 if [ -n "$1" ]; then
+    export cluster_mode="true"
+    
     source $git_root/cluster/cluster.conf
 
     # create redis cluster
     #redis-cli --cluster create $node1_ip:6379 $node2_ip:6379 $node3_ip:6379 $node4_ip:6379 $node5_ip:6379 $node6_ip:6379 --cluster-replicas 1
-    redis-cli --cluster create $node1_ip:$redis_cluster_port $node2_ip:$redis_cluster_port $node3_ip:$redis_cluster_port --cluster-replicas 0 
+    echo "try create cluster"
+    redis-cli --cluster create $node1_ip:6379 $node2_ip:6379 $node3_ip:6379 --cluster-replicas 0 
+    echo "nodes: $node1_ip, $node2_ip, $node3_ip"
+    echo "cluster created"
 else
     master_ip="127.0.0.1"
-    
+fi
+
 # set config
 #       *set the cluster parameter to true if redis cluster mode is enabled. Default is false.
-sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 | sudo tee $out_path/outputLoad.txt
+sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=true | sudo tee $out_path/outputLoad.txt
 
 # run tests
-sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 | sudo tee $out_path/outputRun.txt
-
-# clean up
-# note in cluster mode, you need to manually clean up all records in all nodes.
-redis-cli flushall
+sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=true | sudo tee $out_path/outputRun.txt

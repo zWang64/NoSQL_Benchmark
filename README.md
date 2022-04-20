@@ -42,6 +42,9 @@ The parameter `COUNT` denotes how many records will be inserted into the databas
 
 If the fourth parameter exists, the benchmark will run in cluster mode. There should be 6 nodes in the cluster, and their IPs should be configured in `./cluster/cluster.conf`
 
+## Threads and operation count
+Current number of working threads is 10, and operation count equals to record count.
+
 ## How to set up Redis cluster
 1. Provision 3 cloud VM.
 2. Add their IPs to `./cluster/cluster.conf`.

@@ -38,7 +38,9 @@ fi
 
 # set config
 #       *set the cluster parameter to true if redis cluster mode is enabled. Default is false.
-sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=$cluster_mode | sudo tee $out_path/outputLoad.txt
+sudo $git_root/lib/YCSB/bin/ycsb load redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=$cluster_mode -threads 10| sudo tee $out_path/outputLoad.txt
 
 # run tests
-sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=$cluster_mode | sudo tee $out_path/outputRun.txt
+echo "running redis bm"
+echo "thread count = 10"
+sudo $git_root/lib/YCSB/bin/ycsb run redis -s -P $workload -p recordcount=$count -p redis.host=$master_ip -p redis.port=6379 -p redis.cluster=$cluster_mode -p operationcount=$(($count)) -threads 10 | sudo tee $out_path/outputRun.txt

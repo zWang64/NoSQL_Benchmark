@@ -44,8 +44,8 @@ If the fourth parameter exists, the benchmark will run in cluster mode. There sh
 
 ## How to add a new database
 1. Write `./build/{NEW_DB}_init.sh` to download `NEW_DB` and start it.
-2. Write `./build/{NEW_DB}_init.sh` to start benchmark.
-3. Update `./build/bm_run`
+2. Write `./build/{NEW_DB}_run.sh` to start benchmark.
+3. Update `./build/bm_run`.
 
 Note that the name `NEW_DB` will be used in YCSB binding and finding scripts, so make sure the name is valid.
 

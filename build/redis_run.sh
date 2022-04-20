@@ -15,6 +15,7 @@ if [ -n "$1" ]; then
 
     # create redis cluster
     #redis-cli --cluster create $node1_ip:6379 $node2_ip:6379 $node3_ip:6379 $node4_ip:6379 $node5_ip:6379 $node6_ip:6379 --cluster-replicas 1
+    echo "try create cluster"
     redis-cli --cluster create $node1_ip:6379 $node2_ip:6379 $node3_ip:6379 --cluster-replicas 0 
     echo "nodes: $node1_ip, $node2_ip, $node3_ip"
     echo "cluster created"

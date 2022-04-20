@@ -36,7 +36,7 @@ init() {
 
     echo "-----------------------------------------------------------------"
     # init db
-    bash $git_root/build/"$db"_init.sh
+    #bash $git_root/build/"$db"_init.sh
 
     # build maven
     cd $git_root/lib/YCSB

@@ -11,9 +11,18 @@ fi
 
 # start redis service
 cd $git_root/lib/redis
-if [ -n "$1" ]; then 
-    redis-server ./redis.conf --daemonize yes &> /dev/null
+if [ -n "$1" ]; then
+    echo "start redis in cluster mode"
+    # allow incoming traffic
+    sudo ufw allow 6379
+    sudo ufw allow 6379/tcp
+    sudo ufw allow 16379
+    sudo ufw allow 16379/tcp
+    
+    redis-server ./redis.conf --daemonize yes 
 else
+    echo "start redis in stand alone mode"
+    echo "this is mainly used for test"
     redis-server --daemonize yes &> /dev/null
 fi
 echo "Redis is started."

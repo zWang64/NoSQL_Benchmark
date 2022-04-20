@@ -10,5 +10,10 @@ if [ ! -n "$(redis-cli -v)" ]; then
 fi
 
 # start redis service
-cd $git_root/lib/redis && redis-server --daemonize yes &> /dev/null
+cd $git_root/lib/redis
+if [ -n "$1" ]; then 
+    redis-server ./redis.conf --daemonize yes &> /dev/null
+else
+    redis-server --daemonize yes &> /dev/null
+fi
 echo "Redis is started."

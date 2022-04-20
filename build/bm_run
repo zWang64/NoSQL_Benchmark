@@ -47,6 +47,7 @@ init() {
     echo "-----------------------------------------------------------------"
     # run bench mark
     echo "running benchmark..."
+    echo "git_root=$git_root"
     bash $git_root/build/"$db"_run.sh $4
 }
 

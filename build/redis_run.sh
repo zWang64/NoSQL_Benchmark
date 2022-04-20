@@ -5,10 +5,14 @@ echo "git_root=$git_root"
 cleanup() {
     echo "Cleaning up redis..."
     if [ -n "$cluster_mode" ]; then
-        echo "send clean to cluster..."
+        echo "send FLUSHALL to cluster..."
         redis-cli -h $node1_ip -p 6379 flushall
 	redis-cli -h $node2_ip -p 6379 flushall
 	redis-cli -h $node3_ip -p 6379 flushall
+	echo "send CLUSTER RESET to cluster..."
+	redis-cli -h $node1_ip -p 6379 CLUSTER RESET 
+        redis-cli -h $node2_ip -p 6379 CLUSTER RESET
+        redis-cli -h $node3_ip -p 6379 CLUSTER RESET
     else
     	redis-cli flushall
     fi
@@ -24,7 +28,7 @@ if [ -n "$1" ]; then
     # create redis cluster
     #redis-cli --cluster create $node1_ip:6379 $node2_ip:6379 $node3_ip:6379 $node4_ip:6379 $node5_ip:6379 $node6_ip:6379 --cluster-replicas 1
     echo "try create cluster"
-    redis-cli --cluster create $node1_ip:6379 $node2_ip:6379 $node3_ip:6379 --cluster-replicas 0 
+    redis-cli --cluster create $node1_ip:6379 $node2_ip:6379 $node3_ip:6379 --cluster-replicas 0 --cluster-yes
     echo "nodes: $node1_ip, $node2_ip, $node3_ip"
     echo "cluster created"
 else

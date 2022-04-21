@@ -11,7 +11,8 @@ output_path = current_dir.parent / 'out'
 #   res:       map{...}
 def parse_result(test_name: str) -> Tuple[Dict, Dict]:
     try:
-        test_info = re.search(r"^(?P<db>.*?)-(?P<workload>.*?)-(?P<count>.*?)-(?P<cluster>.*?)", test_name)
+        test_info = re.search(r"^(?P<db>.*?)-(?P<workload>.*?)-(?P<count>.*?)-(?P<cluster>.*?)$", test_name)
+        # print(test_name, test_info)
     except:
         print(f"invalid test name {test_name}")
         exit(-1)

@@ -1,5 +1,4 @@
-# 18845-GP
-[18845-Group_project] NoSQL Databases Benchmark based on [YCSB](https://github.com/brianfrankcooper/YCSB/).
+# NoSQL Databases Benchmark based on [YCSB](https://github.com/brianfrankcooper/YCSB/).
 
 | Team Member | Email |
 | :---: | :---: |

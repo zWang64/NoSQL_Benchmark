@@ -1,0 +1,11 @@
+[OVERALL], RunTime(ms), 94
+[OVERALL], Throughput(ops/sec), 0.0
+[TOTAL_GCS_Copy], Count, 1
+[TOTAL_GC_TIME_Copy], Time(ms), 3
+[TOTAL_GC_TIME_%_Copy], Time(%), 3.1914893617021276
+[TOTAL_GCS_MarkSweepCompact], Count, 0
+[TOTAL_GC_TIME_MarkSweepCompact], Time(ms), 0
+[TOTAL_GC_TIME_%_MarkSweepCompact], Time(%), 0.0
+[TOTAL_GCs], Count, 1
+[TOTAL_GC_TIME], Time(ms), 3
+[TOTAL_GC_TIME_%], Time(%), 3.1914893617021276

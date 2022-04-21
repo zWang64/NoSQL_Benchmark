@@ -69,8 +69,12 @@ case $1 in
         init $1 $2 $3 $4
         ;;
     
+    rocksdb)
+	init $1 $2 $3 $4
+	;;
+
     *)
-        echo "Usage: bm_run {redis|memcached} {a|b|c|d|e|f} {COUNT=number} {cluster_mode=*}"
+        echo "Usage: bm_run {redis|memcached|rocksdb} {a|b|c|d|e|f} {COUNT=number} {cluster_mode=*}"
         exit 1
         ;;
 esac

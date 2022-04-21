@@ -13,7 +13,10 @@ pic_path.mkdir(parents=True, exist_ok=True)
 def cat_plot(dataset, x_name, y_name, hue_name, out_name, o='v'):
     sns.set_theme(style="whitegrid")
     
-    workload_order = ['a', 'b', 'c', 'd', 'e', 'f']
+    # if y_name == ''
+    order = None
+    workload_order = sorted(dataset['Workload'].unique())
+    print(workload_order)
     cluster_order = ['single', 'cluster']
     if hue_name == 'Workload':
         hue_order = workload_order
@@ -28,6 +31,7 @@ def cat_plot(dataset, x_name, y_name, hue_name, out_name, o='v'):
         ci="sd", palette="dark", alpha=.6, height=6,
         orient=o,
     )
+    
     g.despine(left=True)
     g.set_axis_labels(x_name, y_name)
     g.legend.set_title("")
@@ -35,39 +39,12 @@ def cat_plot(dataset, x_name, y_name, hue_name, out_name, o='v'):
     g.fig.savefig(fig_path) 
     return fig_path
 
-def bar_plot(dataset, x1_name, x2_name, y_name, hue_name, out_name):
-    sns.set_theme(style="whitegrid")
-
-    # Initialize the matplotlib figure
-    f, ax = plt.subplots(figsize=(6, 15))
-
-    # d = dataset.sort_values("hue_name", ascending=True)
-
-    # Plot the total crashes
-    sns.set_color_codes("pastel")
-    sns.barplot(x=x1_name, y=y_name, data=dataset,
-                label=x1_name, color="b")
-
-    # Plot the crashes where alcohol was involved
-    # sns.set_color_codes("muted")
-    # sns.barplot(x=x2_name, y=y_name, data=dataset,
-    #             label=x2_name, color="b")
-
-    # Add a legend and informative axis label
-    ax.legend(ncol=2, loc="lower right", frameon=True)
-    ax.set(ylabel="y label", xlabel="x label")
-    sns.despine(left=True, bottom=True)
-    
-    fig_path = pic_path / f"{out_name}-bar.png"
-    f.savefig(fig_path) 
-    return fig_path
-
-def draw(db=None, wl=None, rc=None, cm=False, o='v'):
+def draw(db=None, wl=None, rc=None, cm=False, matric='T', o='v'):
     db = db if db else '*'
     wl = wl if wl else '*'
     rc = rc if rc else '*'
-    mn = mn if cm else '*'
-    test_name = f'{db}-{wl}-{rc}-{mn}'
+    cm = cm if cm else '*'
+    test_name = f'{db}-{wl}-{rc}-{cm}'
     res = parse_all(test_name)
     
     data = []
@@ -75,25 +52,84 @@ def draw(db=None, wl=None, rc=None, cm=False, o='v'):
         infos = r[0]
         db, workload, count, cluster = infos['db'], infos['workload'], infos['count'], infos['cluster']
         matrics = r[1]
+        
+        # for m, v in matrics.items():
+        #     print(m, v)
+        # exit(0)
         try:
-            data.append([db, workload, count, cluster, matrics['overall-Throughput(ops/sec)']])
+            a = [db, workload, count, cluster, 
+                 matrics['overall-Throughput(ops/sec)'], matrics['overall-RunTime(ms)']]
+            if 'read-AverageLatency(us)' in matrics:
+                a.append(matrics['read-AverageLatency(us)'])
+                a.append(matrics['read-MinLatency(us)'])
+                a.append(matrics['read-MaxLatency(us)'])
+                a.append(matrics['read-95thPercentileLatency(us)'])
+                a.append(matrics['read-99thPercentileLatency(us)'])
+            data.append(a)
         except:
-            print(matrics)
+            print('error:', db, workload, count, cluster)
 
     if not data:
         return
     
-    df = pd.DataFrame(data, columns=['Database', 'Workload', 'Record Count', 'Cluster', 'Throughput(ops/sec)'])
+    df = pd.DataFrame(data, columns=[
+        'Database', 'Workload', 'Record Count', 'Cluster', 
+        'Throughput(ops/sec)', 
+        'RunTime(ms)', 
+        'AverageLatency(us)', 
+        'MinLatency(us)', 
+        'MaxLatency(us)', 
+        '95thPercentileLatency(us)', 
+        '99thPercentileLatency(us)'
+        ])
     print(df)
     
-    if mn != '*':
-        p = cat_plot(df, x_name='Database', y_name='Throughput(ops/sec)', hue_name='Workload', out_name=test_name, o=o)
+    y_name = 'Throughput(ops/sec)'
+    if matric == 'R':
+        y_name = 'RunTime(ms)'
     else:
-        # p = bar_plot(df, x1_name='Throughput(ops/sec)', x2_name='', y_name='Workload', hue_name='Workload', out_name=test_name)
-        p = cat_plot(df, x_name='Throughput(ops/sec)', y_name='Workload', hue_name='Cluster', out_name=test_name, o=o)
+        # drop workload E
+        df = df[df['AverageLatency(us)'].notnull()]
+        
+        if matric == 'L':
+            y_name = 'AverageLatency(us)'
+        elif matric == 'L95':
+            y_name = '95thPercentileLatency(us)'
+        elif matric == 'L99':
+            y_name = '99thPercentileLatency(us)'
+        elif matric == 'LA':
+            g = sns.lineplot(data=df[['AverageLatency(us)', 
+                                      '95thPercentileLatency(us)', 
+                                      '99thPercentileLatency(us)',
+                                      'MinLatency(us)', 
+                                      'MaxLatency(us)']])
+            fig = g.get_figure()
+            fig.savefig(pic_path / (test_name+f'-{matric}.png'))
+            g.set_xlabel(x_name)
+            g.set_ylabel(y_name)
+            exit(0)
+        elif matric == 'LL':
+            df = df[df['Cluster'] == 'single'].sort_values(by="Workload")
+            print(df)
+            g = sns.lineplot(data=df[['AverageLatency(us)', 
+                                      '95thPercentileLatency(us)', 
+                                      '99thPercentileLatency(us)']])
+            # x_axis = df['Workload'].values
+            # print('x_axis', x_axis)
+            # g.set_xticks(range(len(x_axis)), x_axis)
+            g.get_figure().savefig(pic_path / (test_name+f'-{matric}.png')) 
+            # g.set_xlabel(x_name)
+            g.set_ylabel(y_name)
+            exit(0)
+    
+    if cm != '*':
+        x_name = 'Database'
+        p = cat_plot(df, x_name=x_name, y_name=y_name, hue_name='Workload', out_name=test_name+f'-{matric}', o=o)
+    else:
+        x_name = 'Workload'
+        p = cat_plot(df, x_name=x_name, y_name=y_name, hue_name='Cluster', out_name=test_name+f'-{matric}', o=o)
 
     print(f'output to: {p}')
-    
 
     
 if __name__ == '__main__':
@@ -103,11 +139,11 @@ if __name__ == '__main__':
     # import matplotlib
     # print(matplotlib.get_backend())
     if sys.argv[1] == 'single':
-        draw(rc=int(sys.argv[2]), cm=sys.argv[1])
+        draw(rc=int(sys.argv[2]), cm=sys.argv[1], matric=sys.argv[3])
     elif sys.argv[1] == 'cluster':
-        draw(rc=int(sys.argv[2]), cm=sys.argv[1])
+        draw(rc=int(sys.argv[2]), cm=sys.argv[1], matric=sys.argv[3])
     elif sys.argv[1] == 'redis':
-        draw(db='redis', rc=int(sys.argv[2]), o='h')
+        draw(db='redis', rc=int(sys.argv[2]), matric=sys.argv[3])
     else:
-        print('Usage: [single|cluster|redis|memcached] recordcount')
+        print('Usage: [single|cluster|redis|memcached] recordcount [T|L|L95|L99|LA|LL]')
         

@@ -73,8 +73,12 @@ case $1 in
 	init $1 $2 $3 $4
 	;;
 
+    mongodb)
+	init $1 $2 $3 $4
+	;;
+
     *)
-        echo "Usage: bm_run {redis|memcached|rocksdb} {a|b|c|d|e|f} {COUNT=number} {cluster_mode=*}"
+        echo "Usage: bm_run {redis|memcached|rocksdb|mongodb} {a|b|c|d|e|f} {COUNT=number} {cluster_mode=*}"
         exit 1
         ;;
 esac

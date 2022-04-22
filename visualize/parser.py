@@ -22,9 +22,8 @@ def parse_result(test_name: str) -> Tuple[Dict, Dict]:
     
     res = {}
     for x in [line.split(',') for line in lines]:
-        if len(x) < 3:
-            print(f'error parsing {test_name}: {x}')
-            return
+        if len(x) != 3:
+            continue
         res[x[0].strip('[] ').lower() + '-' + x[1].strip()] = float(x[2].strip())
     return test_info, res
 
@@ -55,7 +54,7 @@ def parse_all(pattern: str) -> Dict[str, str]:
     return res
 
 if __name__ == '__main__':
-    for name, contant in parse_all("redis-*").items():
+    for name, contant in parse_all("mongodb-*").items():
         print(name)
         print('--------------------')
         print_parse_result(contant)

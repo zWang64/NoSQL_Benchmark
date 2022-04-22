@@ -73,7 +73,7 @@ def draw(db=None, wl=None, rc=None, cm=False, matric='T', o='v'):
         return
     
     df = pd.DataFrame(data, columns=[
-        'Database', 'Workload', 'Record Count', 'Cluster', 
+        'Database', 'Workload', 'RecordCount', 'Cluster', 
         'Throughput(ops/sec)', 
         'RunTime(ms)', 
         'AverageLatency(us)', 
@@ -84,8 +84,9 @@ def draw(db=None, wl=None, rc=None, cm=False, matric='T', o='v'):
         ])
     print(df)
     
-    y_name = 'Throughput(ops/sec)'
-    if matric == 'R':
+    if matric == 'T':
+        y_name = 'Throughput(ops/sec)'
+    elif matric == 'R':
         y_name = 'RunTime(ms)'
     else:
         # drop workload E
@@ -110,7 +111,7 @@ def draw(db=None, wl=None, rc=None, cm=False, matric='T', o='v'):
             exit(0)
         elif matric == 'LL':
             df = df[df['Cluster'] == 'single'].sort_values(by="Workload")
-            print(df)
+            
             g = sns.lineplot(data=df[['AverageLatency(us)', 
                                       '95thPercentileLatency(us)', 
                                       '99thPercentileLatency(us)']])
@@ -121,6 +122,25 @@ def draw(db=None, wl=None, rc=None, cm=False, matric='T', o='v'):
             # g.set_xlabel(x_name)
             g.set_ylabel(y_name)
             exit(0)
+        elif matric == 'test':
+            df = df[df['Workload'] == 'a']
+            for row in df.iterrows():
+                c = row[1][3]
+                x = ['AverageLatency(us)', '95thPercentileLatency(us)', '99thPercentileLatency(us)']
+                y = [row[1][6], row[1][9], row[1][10]] # row[1][7], row[1][8]]: min, max
+                g = sns.lineplot(x=x, y=y)
+            #     print(x, y)
+            # # print(df)
+            # exit(0)
+            # g = sns.lineplot(data=df,)
+            # x_axis = df['Workload'].values
+            # print('x_axis', x_axis)
+            # g.set_xticks(range(len(x_axis)), x_axis)
+            g.get_figure().savefig(pic_path / (test_name+f'-{matric}.png')) 
+            # g.set_xlabel(x_name)
+            g.set_ylabel(y_name)
+            exit(0)
+            
     
     if cm != '*':
         x_name = 'Database'
@@ -138,12 +158,16 @@ if __name__ == '__main__':
     #
     # import matplotlib
     # print(matplotlib.get_backend())
-    if sys.argv[1] == 'single':
+    if len(sys.argv) < 2 or sys.argv[1] == 'help':
+        print('Usage:') 
+        print('    draw all databases:')
+        print('        [single|cluster] recordcount [T|L|L95|L99|LA|LL]')
+        print('    draw special databases:')
+        print('        [redis|memcached|rocksdb|mongodb] recordcount [T|L|L95|L99|LA|LL] [single|cluster|*]')
+    elif sys.argv[1] == 'single':
         draw(rc=int(sys.argv[2]), cm=sys.argv[1], matric=sys.argv[3])
     elif sys.argv[1] == 'cluster':
         draw(rc=int(sys.argv[2]), cm=sys.argv[1], matric=sys.argv[3])
-    elif sys.argv[1] == 'redis':
-        draw(db='redis', rc=int(sys.argv[2]), matric=sys.argv[3])
     else:
-        print('Usage: [single|cluster|redis|memcached] recordcount [T|L|L95|L99|LA|LL]')
-        
+        a = sys.argv[4] if len(sys.argv) == 5 else None
+        draw(db=sys.argv[1], rc=int(sys.argv[2]), matric=sys.argv[3], cm=a)
